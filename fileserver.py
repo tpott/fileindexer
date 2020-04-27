@@ -8,6 +8,11 @@ import http.server
 import os
 import socketserver
 import ssl
+from typing import (Dict, NewType, Tuple, Union)
+
+from filelist import Hex
+
+Count = NewType('Count', int)
 
 
 # __enter__ and __exit__ is necessary to use the below syntax of `with Server(..) as ..`
@@ -63,7 +68,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
     self.wfile.write(err)
     return
 
-  def differentFileSize(path, local_path, current_size, expected_size):
+  def differentFileSize(self, path, local_path, current_size, expected_size):
     # TODO include more debugging info?
     err = b'File has changed sizes'
     self.send_response(http.server.HTTPStatus.INTERNAL_SERVER_ERROR)
@@ -72,7 +77,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
     self.wfile.write(err)
     return
 
-  def differentFileContent(path, local_path, hex_digest):
+  def differentFileContent(self, path, local_path, hex_digest):
     # TODO include more debugging info?
     err = b'File content has changed'
     self.send_response(http.server.HTTPStatus.INTERNAL_SERVER_ERROR)

@@ -17,9 +17,28 @@ possible distinct values is capped, and likely much lower than the max.
 
 Naive approach:
 
+```
 big_file_list --> many(file_list) --[map]--> fetch_files --> ngrams --[map]--> join(ngrams)
+```
 
-Problem is that for larger ngrams * files will cause join to crash.
+Problem is that for larger `ngrams * files` will cause join to crash.
+
+# Challenge
+
+Hypothetical size: 100TB in total across 200M distinct files. Numbers inspired by
+[Sort Benchmark](https://sortbenchmark.org/). Useful for applications like
+[VTGREP](https://blog.virustotal.com/2019/03/time-for-vt-enterprise-to-step-up.html).
+
+For the sake of simplicity, assume that the minimum file size is 8 bytes (that's
+small enough to fit in a single 64bit register!!) and max file size is 10GB.
+This should make it interesting since some files will be much larger than the
+average ~500KB.
+
+This is also inspired by how simple [bashreduce](https://github.com/erikfrey/bashreduce)
+seems to be. Ideally this project will be able to make something similar, but
+be implemented in python. Assuming `map` functions are apart of the standard
+toolchain, then the heavy CPU should be done outside of python anyways. `ssh`
+and `scp` should be able to get a long ways for distributing work.
 
 # fileserver
 In order to run `fetch_files` from above, we need some service to return file
@@ -36,6 +55,6 @@ python3 filelist.py ~ | mlr --itsvlite --otsv sample -k 5
 
 # Useful utilities:
 
-* [mlr](https://johnkerl.org/miller/doc/) for combining multiple CSVs/TSVs
-** `mlr --itsvlite --otsvlite cat ngrams1 ngrams2 ngrams3 ...`
+* [mlr](https://johnkerl.org/miller/doc/) for combining multiple CSVs/TSVs.
+Example: `mlr --itsvlite --otsvlite cat ngrams1 ngrams2 ngrams3 ...`
 * [jq](https://stedolan.github.io/jq/manual/) for manipulating JSON
